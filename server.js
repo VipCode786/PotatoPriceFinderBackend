@@ -36,23 +36,86 @@ const processCSV = async (fileName, pounds,res) => {
         console.log("pounds",pounds)
         const poundsAvailable = pounds;
 
+        console.log("pounds.........",poundsAvailable)
+      
+      if(poundsAvailable >=0){
+
+        const calculatePricePerPound = (supplier) => {
+          const unitPrice = parseFloat(supplier["unit price"]);
+          const unitWeight = parseInt(supplier["unit weight"]);
+          return unitPrice / unitWeight;
+        };
+  
       const filteredResults = results.filter(
-        (supplier) => parseInt(supplier["unit quanitiy"]) >= poundsAvailable
+        (supplier) => (parseInt(supplier["unit quanitiy"]) * parseInt(supplier["unit weight"]) >= poundsAvailable)
       );
 
-      filteredResults.sort((a, b) => {
-        const pricePerPoundA = parseFloat(a["unit price"]) / parseInt(a["unit weight"]);
-        const pricePerPoundB = parseFloat(b["unit price"]) / parseInt(b["unit weight"]);
-        return pricePerPoundA - pricePerPoundB;
-      });
+      console.log("filterdata",filteredResults)
 
-      const cheapestSellers = filteredResults.slice(0, 3);
+      // filteredResults.sort((a, b) => {
+      //   const pricePerPoundA = parseFloat(a["unit price"]) / parseInt(a["unit weight"]);
+      //   const pricePerPoundB = parseFloat(b["unit price"]) / parseInt(b["unit weight"]);
+      //   return pricePerPoundA - pricePerPoundB;
+      // });
+
+      const cheapestSellers= filteredResults.map((supplier) => ({
+        ...supplier,
+        pricePerPound: calculatePricePerPound(supplier),
+      }))
+      .sort((a, b) => a.pricePerPound - b.pricePerPound)
+      // .slice(0, 3);
+      // const cheapestSellers = filteredResults.slice(0, 3);
 
       if (cheapestSellers.length > 0) {
         res.status(200).json(cheapestSellers);
       } else {
         res.status(200).json({ message: "Cheapest sellers not available for the given pounds" });
       }
+    }
+    else{
+
+      // Inside your component function
+      const calculatePricePerPound = (supplier) => {
+        const unitPrice = parseFloat(supplier["unit price"]);
+        const unitWeight = parseInt(supplier["unit weight"]);
+        return unitPrice / unitWeight;
+      };
+
+
+       console.log("results",results)
+
+       const cheapestSellers = results.map((supplier) => ({
+        ...supplier,
+        pricePerPound: calculatePricePerPound(supplier),
+      })).sort((a, b) => a.pricePerPound - b.pricePerPound)
+      .slice(0, 3);
+
+      // console.log(resultsWithPricePerPound);
+
+      // const cheapestSellers =  resultsWithPricePerPound.sort((a, b) => a.pricePerPound - b.pricePerPound)
+      // .slice(0, 3);
+
+        // const cheapestSellers = results
+        //   .map((supplier) => ({
+        //     ...supplier,
+        //     pricePerPound:parseFloat(supplier.unitPrice) / parseInt(supplier.unitWeight)
+        //     // pricePerPound: calculatePricePerPound(supplier),
+        //   }))
+      
+      // const filteredResults =  results.sort((a, b) => {
+      //   const pricePerPoundA = parseFloat(a["unit price"]) / parseInt(a["unit weight"]);
+      //   const pricePerPoundB = parseFloat(b["unit price"]) / parseInt(b["unit weight"]);
+      //   return pricePerPoundA - pricePerPoundB;
+      // });
+
+      // const cheapestSellers = filteredResults.slice(0, 3);
+
+      if (cheapestSellers.length > 0) {
+        res.status(200).json(cheapestSellers);
+      } else {
+        res.status(200).json({ message: "Cheapest sellers not available for the given pounds" });
+      }
+    }
     
       });
 
